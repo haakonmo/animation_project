@@ -1,0 +1,6 @@
+# Vim files
+*~
+*.swp
+
+# Andy's stuff
+makefile

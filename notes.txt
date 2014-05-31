@@ -1,0 +1,6 @@
+Partical systems:
+    http://prideout.net/blog/?p=67
+
+Smoke and fire rendering papers:
+    http://graphics.ucsd.edu/~henrik/papers/smoke/
+    http://graphics.ucsd.edu/~henrik/

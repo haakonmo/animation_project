@@ -1,6 +1,8 @@
 if (!Detector.webgl)
 	Detector.addGetWebGLMessage();
 
+var fluid;
+
 var camera, controls, scene, renderer;
 
 var mesh, smokeParticles, smoke;
@@ -11,6 +13,9 @@ init();
 animate();
 
 function init() {
+
+	// fluid
+	fluid = new CS274C.Fluid();
 
 	// camera
 	camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 5, 3500);
@@ -70,23 +75,21 @@ function animate() {
 	controls.update();
 	animateSmoke();
 	render();
+	fluid.step();
 }
 
 function animateSmoke() {
-	var particleCount = smokeParticles.vertices.length;
-	while (particleCount--) {
-		var particle = smokeParticles.vertices[particleCount];
-		particle.y += Math.random() * 7;
-		particle.x += Math.random() * 10 - 5;
-		particle.z += Math.random() * 10 - 5;
+	var points = smokeParticles.vertices;
 
-		if (particle.y >= window.innerHeight) {
-			particle.y = 0;
-			particle.x = 0;
-			particle.z = 0;
+	fluid.move(points);
+
+	for (var i = 0; i < points.length; i++) {
+		if (points[i].y >= window.innerHeight) {
+			points[i].y = 0;
+			points[i].x = 0;
+			points[i].z = 0;
 		}
 	}
-	smokeParticles.__dirtyVertices = true;
 }
 
 function render() {
