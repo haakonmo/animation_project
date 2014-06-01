@@ -75,18 +75,18 @@ function animate() {
 	controls.update();
 	animateSmoke();
 	render();
-	fluid.step();
 }
 
 function animateSmoke() {
 	var points = smokeParticles.vertices;
 
+	fluid.step();
 	fluid.move(points);
 
 	for (var i = 0; i < points.length; i++) {
 		if (points[i].y >= window.innerHeight) {
+			//points[i].x = 0;
 			points[i].y = 0;
-			points[i].x = 0;
 			points[i].z = 0;
 		}
 	}

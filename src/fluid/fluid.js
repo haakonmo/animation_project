@@ -34,30 +34,6 @@ function make_grid(xs, ys, fn)
 	return out
 }
 
-function copy_grid(src)
-{
-	var xs  = src.length
-	var ys  = src[0].length
-	var out = []
-	for (var x = 0; x < xs; x++) { out[x]    = []
-	for (var y = 0; y < ys; y++) { out[x][y] = src[x][y]
-	} }
-	return out
-}
-
-function copy_gridv(src)
-{
-	var xs  = src.length
-	var ys  = src[0].length
-	var is  = src[0][0].length
-	var out = []
-	for (var x = 0; x < xs; x++) { out[x]       = []
-	for (var y = 0; y < ys; y++) { out[x][y]    = []
-	for (var i = 0; i < is; i++) { out[x][y][i] = src[x][y][i]
-	} } }
-	return out
-}
-
 // Fluid class
 Fluid = function(xs, ys, visc, dt)
 {
@@ -70,17 +46,7 @@ Fluid = function(xs, ys, visc, dt)
 }
 
 // Density Equations
-Fluid.prototype.add_source = function(dst, src, dt)
-{
-	var xs = src.length
-	var ys = src[0].length
-
-	for (var x = 0; x < xs; x++)
-	for (var y = 0; y < ys; y++)
-		dst[x][y] += src[x][y] * dt
-}
-
-Fluid.prototype.diffuse = function(dst, src, dt)
+Fluid.prototype.dens_diffuse = function(dst, src, dt)
 {
 	var xs = src.length
 	var ys = src[0].length
@@ -90,7 +56,7 @@ Fluid.prototype.diffuse = function(dst, src, dt)
 		dst[x][y] = src[x][y]
 }
 
-Fluid.prototype.advect = function(dst, src, vel, dt)
+Fluid.prototype.dens_advect = function(dst, src, vel, dt)
 {
 	var xs = src.length
 	var ys = src[0].length
@@ -127,26 +93,12 @@ Fluid.prototype.advect = function(dst, src, vel, dt)
 
 Fluid.prototype.dens_step = function(dst, src, vel, dt)
 {
-	//this.add_source(dst, src, dt)
-	this.diffuse(src, dst, dt); // ????
-	this.advect(dst, src, vel, dt)
+	this.dens_diffuse(src, dst, dt);
+	this.dens_advect(dst, src, vel, dt)
 }
 
 // Velocity equations
-Fluid.prototype.add_sourcev = function(dst, src, dt)
-{
-	var xs = src.length
-	var ys = src[0].length
-	var is = src[0][0].length
-	//alert(xs +'x'+ ys +'x'+ is)
-
-	for (var x = 0; x < xs; x++)
-	for (var y = 0; y < ys; y++)
-	for (var i = 0; i < ys; i++)
-		dst[x][y][i] += src[x][y][i] * dt
-}
-
-Fluid.prototype.diffusev = function(dst, src, dt)
+Fluid.prototype.vel_diffuse = function(dst, src, dt)
 {
 	var xs = src.length
 	var ys = src[0].length
@@ -158,7 +110,7 @@ Fluid.prototype.diffusev = function(dst, src, dt)
 		dst[x][y][i] = src[x][y][i]
 }
 
-Fluid.prototype.advectv = function(dst, src, vel, dt)
+Fluid.prototype.vel_advect = function(dst, src, vel, dt)
 {
 	var xs = src.length
 	var ys = src[0].length
@@ -195,7 +147,7 @@ Fluid.prototype.advectv = function(dst, src, vel, dt)
 	}
 }
 
-Fluid.prototype.projectv = function(dst, src)
+Fluid.prototype.vel_project = function(dst, src)
 {
 	var xs = src.length
 	var ys = src[0].length
@@ -233,24 +185,11 @@ Fluid.prototype.projectv = function(dst, src)
 
 Fluid.prototype.vel_step = function(dst, src, dt)
 {
-	//this.add_sourcev(dst, src, dt)
+	this.vel_diffuse(src, dst, dt)
+	this.vel_project(src, dst)
 
-	this.diffusev(src, dst, dt)
-	this.projectv(src, dst)
-
-	//alert('x='+dst[1][1][0]+', y='+dst[1][1][1])
-	//alert('x='+src[1][1][0]+', y='+src[1][1][1])
-
-	this.advectv(dst, src, src, dt)
-	this.projectv(dst, src)
-
-	//var xs = src.length
-	//var ys = src[0].length
-	//var is = src[0][0].length
-	//for (var x = 0; x < xs; x++)
-	//for (var y = 0; y < ys; y++)
-	//for (var i = 0; i < is; i++)
-	//	dst[x][y][i] = src[x][y][i]
+	this.vel_advect(dst, src, src, dt)
+	this.vel_project(dst, src)
 }
 
 Fluid.prototype.step = function()
@@ -263,5 +202,4 @@ Fluid.prototype.step = function()
 
 	this.vel_step(this.vel, prev_vel, this.dt)
 	this.dens_step(this.dens, prev_dens, this.vel, this.dt)
-	//this.display(new Field(dens, u, v))
 }
