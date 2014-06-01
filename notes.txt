@@ -4,3 +4,6 @@ Partical systems:
 Smoke and fire rendering papers:
     http://graphics.ucsd.edu/~henrik/papers/smoke/
     http://graphics.ucsd.edu/~henrik/
+
+Fluid dynamics
+    http://www.ibiblio.org/e-notes/webgl/gpu/fluid.htm
