@@ -89,7 +89,7 @@ CS274C.Fluid.prototype.move = function(dt, points) {
 
 		// Linear interp
 		var xc  = ((points[i].x - this.offset[0]) / this.scale[0])
-		var yc  = ((points[i].z - this.offset[2]) / this.scale[2]) + 2
+		var yc  = ((points[i].z - this.offset[2]) / this.scale[2])
 
 		var x0  = Math.floor(xc)
 		var y0  = Math.floor(yc)
@@ -133,8 +133,32 @@ CS274C.Fluid.prototype.addMass = function(x, y, z, mass) {
 // Apply a force to the velocity field
 //    - e.g. adding heat will reduce mass
 CS274C.Fluid.prototype.addForce = function(x, y, z, vel) {
-	for (var i = 0; i < 3; i++)
-		this.grid[x][y][z].vel[i] += vel[i]
+	//for (var i = 0; i < 3; i++)
+	//	this.grid[x][y][z].vel[i] += vel[i]
+
+	//alert('of=' + this.offset);
+	//alert('sf=' + this.scale);
+
+	var xc = ((x - this.offset[0]) / this.scale[0])
+	var yc = ((z - this.offset[2]) / this.scale[2])
+
+	var x0  = Math.floor(xc)
+	var y0  = Math.floor(yc)
+	var x1  = x0 + 1
+	var y1  = y0 + 1
+
+	var xsf = x1 - xc
+	var ysf = y1 - yc
+
+	this.vel[x0][y0][0] += vel[0]*(  xsf)*(  ysf)
+	this.vel[x0][y1][0] += vel[0]*(  xsf)*(1-ysf)
+	this.vel[x1][y0][0] += vel[0]*(1-xsf)*(  ysf)
+	this.vel[x1][y1][0] += vel[0]*(1-xsf)*(1-ysf)
+
+	this.vel[x0][y0][1] += vel[2]*(  xsf)*(  ysf)
+	this.vel[x0][y1][1] += vel[2]*(  xsf)*(1-ysf)
+	this.vel[x1][y0][1] += vel[2]*(1-xsf)*(  ysf)
+	this.vel[x1][y1][1] += vel[2]*(1-xsf)*(1-ysf)
 }
 
 // Get velocity field

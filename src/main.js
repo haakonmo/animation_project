@@ -1,7 +1,8 @@
 if (!Detector.webgl)
 	Detector.addGetWebGLMessage()
 
-var lastTime = 0
+var element, mouse, lastMove, lastTime
+var projector
 
 var fluid, velocityField
 
@@ -11,16 +12,15 @@ var smokeParticles, smoke
 
 var GROUND_SIZE    = 16
 
-//var GRID_SIZE      = [66, 66, 66]
-var GRID_SIZE      = [34, 34, 34]
-//var GRID_SIZE      = [18, 18, 18]
-//var GRID_SIZE      = [10, 10, 10]
-var GRID_SCALE     = [GROUND_SIZE / (GRID_SIZE[0]-2),
-                      GROUND_SIZE / (GRID_SIZE[1]-2),
-                      GROUND_SIZE / (GRID_SIZE[2]-2)]
+var GRID_SIZE      = [19, 19, 19]
+var GRID_SCALE     = [GROUND_SIZE / (GRID_SIZE[0]-3),
+                      GROUND_SIZE / (GRID_SIZE[1]-3),
+                      GROUND_SIZE / (GRID_SIZE[2]-3)]
 var GRID_OFFSET    = [-(GRID_SIZE[0]/2-0.5) * GRID_SCALE[0],
                       -(GRID_SIZE[1]/2-0.5) * GRID_SCALE[1],
-                      -(               1.0) * GRID_SCALE[1]]
+                      -(               1.0) * GRID_SCALE[2]]
+
+var VECTOR_OFFSET  = GRID_SIZE[1] / 2 - 0.5
 
 var PARTICLE_COUNT = 10000
 var PARTICLE_SIZE  = 1
@@ -41,6 +41,8 @@ function init() {
 	renderer.setClearColor(0x8088e0, 1)
 	renderer.setSize(512, 512)
 
+	element = renderer.domElement
+
 	// fluid
 	fluid = new CS274C.Fluid(GRID_SIZE, GRID_SCALE, GRID_OFFSET)
 	//fluid.step(0.1)
@@ -49,7 +51,6 @@ function init() {
 	//fluid.step(0.1)
 
 	// camera
-	var element = renderer.domElement
 	var aspect  = element.width / element.height
 	camera = new THREE.PerspectiveCamera(30, aspect, 0.01, 1000)
 	camera.position.set(-15, -50, 25)
@@ -57,6 +58,8 @@ function init() {
 	controls = new THREE.OrbitControls(camera)
 	controls.target = new THREE.Vector3(0, 0, 7)
 	controls.addEventListener('change', render)
+
+	projector = new THREE.Projector()
 
 	// scene
 	scene = new THREE.Scene()
@@ -121,8 +124,7 @@ function init() {
 	velocityField = []
 	for (var x = 0; x < GRID_SIZE[0]; x++)
 	for (var z = 0; z < GRID_SIZE[2]; z++) {
-		var y = 3.5
-
+		var y   = VECTOR_OFFSET
 		var src = new THREE.Vector3(
 				x * GRID_SCALE[0] + GRID_OFFSET[0],
 				y * GRID_SCALE[1] + GRID_OFFSET[1],
@@ -148,8 +150,16 @@ function init() {
 
 	// append
 	document.body.appendChild(renderer.domElement)
+	element.addEventListener('mousemove', onMouseMove, false)
 	//window.addEventListener('resize', onWindowResize, false)
 
+}
+
+function onMouseMove(event) {
+	event.preventDefault()
+	var x =  (((event.clientX - element.offsetLeft) / element.offsetWidth ) * 2 - 1)
+	var y = -(((event.clientY - element.offsetTop)  / element.offsetHeight) * 2 - 1)
+	mouse = [x, y]
 }
 
 function onWindowResize() {
@@ -194,7 +204,7 @@ function animateSmoke(dt) {
 	]
 
 	// Split pionts into visible and hidden points
-	var visible = [], hidden = [];
+	var visible = [], hidden = []
 	for (var i = 0; i < points.length; i++) {
 		if (points[i].z >= -0.5)
 			visible.push(points[i])
@@ -214,6 +224,24 @@ function animateSmoke(dt) {
 			}
 		}
 
+	}
+
+	// Process mouse events
+	if (mouse) {
+		var vector    = new THREE.Vector3(mouse[0], mouse[1], 1)
+		var plane     = new THREE.Plane(new THREE.Vector3(0,-1,0), 0)
+		var raycaster = projector.pickingRay(vector, camera)
+		var position  = raycaster.ray.intersectPlane(plane)
+
+		if (lastMove) {
+			var delta = position.clone().sub(lastMove)
+			fluid.addForce(position.x, position.y, position.z,
+					[delta.x, delta.y, delta.z])
+			//alert('dx,dz='+delta.x+','+delta.z)
+		}
+
+		lastMove = position
+		mouse    = false
 	}
 
 	// Move the visible points
