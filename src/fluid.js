@@ -57,21 +57,21 @@ CS274C.Fluid.prototype.step = function() {
 	var prev_vel = make_grid(xs, ys, function(){ return [0.0,0.0] })
 
 	// Testing
-	this.vel_step(this.vel, prev_vel, this.dt)
+	this.vel[Math.floor(xs/2)-1][Math.floor(ys*0.50)][1] = 0.1
+	this.vel[Math.floor(xs/2)-0][Math.floor(ys*0.50)][1] = 0.1
+	this.vel[Math.floor(xs/2)+1][Math.floor(ys*0.50)][1] = 0.1
+	this.vel[Math.floor(xs/2)+2][Math.floor(ys*0.50)][1] = 0.1
 
-	this.vel[Math.floor(xs/2)-1][Math.floor(ys*0.50)][1] =  5
-	this.vel[Math.floor(xs/2)-0][Math.floor(ys*0.50)][1] =  5
-	this.vel[Math.floor(xs/2)+1][Math.floor(ys*0.50)][1] =  5
-	this.vel[Math.floor(xs/2)+2][Math.floor(ys*0.50)][1] =  5
+	this.vel_step(this.vel, prev_vel, this.dt)
 }
 
 // Move a set of points based on the fluid systems velocity field
 CS274C.Fluid.prototype.move = function(points) {
 	// Brownian motion
 	for (var i = 0; i < points.length; i++) {
-		points[i].x += (Math.random() - 0.5) * 1
-		points[i].y += (Math.random() - 0.5) * 1
-		points[i].z += (Math.random() - 0.5) * 1
+		points[i].x += (Math.random() - 0.5) * 0.1
+		points[i].y += (Math.random() - 0.5) * 0.1
+		points[i].z += (Math.random() - 0.5) * 0.1
 	}
 
 	// Fluid motion
@@ -89,7 +89,7 @@ CS274C.Fluid.prototype.move = function(points) {
 		var vel = this.vel[ix][iy]
 
 		points[i].x += vel[0]
-		points[i].y += vel[1]
+		points[i].z += vel[1]
 	}
 }
 
