@@ -3,8 +3,25 @@
 		<title>CS270C - Project Name</title>
 		<link rel="stylesheet" type="text/css" href="./style.css" />
 		<meta charset="UTF-8" />
+		<script type="x-shader/x-vertex" id="vertexshader">
+			attribute float alpha;
+			varying float vAlpha;
+			void main() {
+				vAlpha = alpha;
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+				gl_PointSize = 20.0;
+				gl_Position = projectionMatrix * mvPosition;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader">
+			uniform vec3 color;
+			varying float vAlpha;
+			void main() {
+				gl_FragColor = vec4( color, vAlpha );
+			}
+		</script>
 	</head>
-	<body style="padding: 20px;">
+	<body>
 		<script src="../lib/three.min.js"></script>
 		<script src="../lib/OrbitControlsEnu.js"></script>
 		<script src="../lib/Detector.js"></script>

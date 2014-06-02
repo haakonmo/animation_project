@@ -11,29 +11,31 @@ var fires, fluid, velocityField
 
 var camera, controls, scene, renderer
 
-var smokeParticles, smoke
+var smokeParticles
 
-var GROUND_SIZE    = 25
+var GROUND_SIZE     = 25
 
-//var GRID_SIZE      = [7, 7, 7]
-//var GRID_SIZE      = [11, 11, 11]
-var GRID_SIZE      = [19, 19, 19]
-//var GRID_SIZE      = [35, 35, 35]
-var GRID_SCALE     = [GROUND_SIZE / (GRID_SIZE[0]-3),
-                      GROUND_SIZE / (GRID_SIZE[1]-3),
-                      GROUND_SIZE / (GRID_SIZE[2]-3)]
-var GRID_OFFSET    = [-(GRID_SIZE[0]/2-0.5) * GRID_SCALE[0],
-                      -(GRID_SIZE[1]/2-0.5) * GRID_SCALE[1],
-                      -(               1.0) * GRID_SCALE[2]]
+//var GRID_SIZE        = [7, 7, 7]
+//var GRID_SIZE        = [11, 11, 11]
+//var GRID_SIZE        = [19, 19, 19]
+//var GRID_SIZE        = [35, 35, 35]
 
-var VECTOR_INDEX   = Math.floor(GRID_SIZE[1] / 2)
-var VECTOR_MODULO  = 1
-var VECTOR_OFFSET  = GRID_SIZE[1] / 2 - 0.5
+var GRID_SCALE       = [GROUND_SIZE / (GRID_SIZE[0]-3),
+                        GROUND_SIZE / (GRID_SIZE[1]-3),
+                        GROUND_SIZE / (GRID_SIZE[2]-3)]
+var GRID_OFFSET      = [-(GRID_SIZE[0]/2-0.5) * GRID_SCALE[0],
+                        -(GRID_SIZE[1]/2-0.5) * GRID_SCALE[1],
+                        -(               1.0) * GRID_SCALE[2]]
+                     
+var VECTOR_INDEX     = Math.floor(GRID_SIZE[1] / 2)
+var VECTOR_MODULO    = 1
+var VECTOR_OFFSET    = GRID_SIZE[1] / 2 - 0.5
+                     
+var BURN_RATE        = 200    // needs a residual
 
-var BURN_RATE      = 50     // needs a residual
-
-var PARTICLE_COUNT = 10000
-var PARTICLE_SIZE  = 1
+var PARTICLE_COUNT   = 10000
+var PARTICLE_SIZE    = 10
+var PARTICLE_OPACITY = 0.02
 
 init()
 animate()
@@ -51,8 +53,8 @@ function init() {
 	renderer.shadowMapEnabled  = true
 	renderer.shadowMapCullFace = THREE.CullFaceBack
 
-	renderer.setClearColor(0x8088e0, 1)
-	renderer.setSize(512, 512)
+	//renderer.setClearColor(0x8088e0, 1)
+	renderer.setClearColor(0x00ff00, 1)
 
 	element = renderer.domElement
 
@@ -66,7 +68,7 @@ function init() {
 	// camera
 	var aspect  = element.width / element.height
 	camera = new THREE.PerspectiveCamera(30, aspect, 0.01, 1000)
-	camera.position.set(-15, -50, 25)
+	camera.position.set(-15, -50, 20)
 	//camera.position.set(0, -50, 2)
 	camera.up.set(0, 0, 1)
 	controls = new THREE.OrbitControls(camera)
@@ -97,10 +99,26 @@ function init() {
 	lightDirection.shadowDarkness     =  0.35
 	scene.add(lightDirection)
 
+	// sky
+	var skyGeometry = new THREE.SphereGeometry(50, 50, 40)
+	var skyMaterial = new THREE.MeshBasicMaterial({
+		map: THREE.ImageUtils.loadTexture('../images/sky.png'),
+	})
+
+	var sky = new THREE.Mesh(skyGeometry, skyMaterial)
+	sky.rotation.x = Math.PI/2
+	sky.rotation.y = 0
+	sky.rotation.z = -Math.PI/2
+	sky.scale.set(-1, 1, 1)
+	sky.eulerOrder = 'ZXY'
+	sky.renderDepth = 100.0
+	scene.add(sky)
+
 	// ground
-	var groundGeometry = new THREE.PlaneGeometry(GROUND_SIZE, GROUND_SIZE)
-	var groundMaterial = new THREE.MeshPhongMaterial(
-			{color: 0x3B2E29, side: THREE.DoubleSide})
+	var groundGeometry = new THREE.PlaneGeometry(GROUND_SIZE*2, GROUND_SIZE*2)
+	var groundMaterial = new THREE.MeshBasicMaterial({
+		map : THREE.ImageUtils.loadTexture('../images/ground.jpg'),
+	})
 	var ground         = new THREE.Mesh(groundGeometry, groundMaterial)
 	ground.receiveShadow = true
 	scene.add(ground)
@@ -121,15 +139,15 @@ function init() {
 	}
 
 	var smokeMaterial = new THREE.ParticleBasicMaterial({
-		// map: THREE.ImageUtils.loadTexture('../images/particle.png'),
+		map:         THREE.ImageUtils.loadTexture('../images/smoke.png'),
 		transparent: true,
+		opacity:     PARTICLE_OPACITY,
 		blending:    THREE.NormalBlending,
+		depthTest:   true,
 		size:        PARTICLE_SIZE,
-		color:       0xE0E0E0,
-		opacity:     0.1
 	})
 
-	smoke = new THREE.ParticleSystem(smokeParticles, smokeMaterial)
+	var smoke = new THREE.ParticleSystem(smokeParticles, smokeMaterial)
 	smoke.sortParticles = true
 	smoke.castShadow    = true
 	smoke.receiveShadow = true
@@ -172,7 +190,8 @@ function init() {
 	document.body.appendChild(renderer.domElement)
 	document.addEventListener('mousemove', onMouseMove, false)
 	document.addEventListener('keypress',  onKeyPress,  false)
-	//window.addEventListener('resize', onWindowResize, false)
+	window.addEventListener('resize', onWindowResize, false)
+	onWindowResize()
 
 }
 
@@ -276,13 +295,13 @@ function animateSmoke(dt) {
 		switch (button.key) {
 			case 'e': // extinguish
 				this.fires = []
-				break;
+				break
 
 			case 'c': // clear
 				var points = smokeParticles.vertices
 				for (var i = 0; i < points.length; i++)
 					points[i].z = -1
-				break;
+				break
 
 			case 's': // stop
 				var vel = fluid.getVelocity()
@@ -290,7 +309,7 @@ function animateSmoke(dt) {
 				for (var y = 0; y < GRID_SIZE[1]; y++)
 				for (var z = 0; z < GRID_SIZE[2]; z++)
 					vel[x][y][z] = [0,0,0]
-				break;
+				break
 
 			case 'f': // fire
 				var normal    = new THREE.Vector3(0, 0, 1)
@@ -308,7 +327,7 @@ function animateSmoke(dt) {
 						z: 0.5,
 						heat: 1
 					})
-				break;
+				break
 		}
 		button.key = false
 	}
