@@ -1,10 +1,13 @@
 if (!Detector.webgl)
 	Detector.addGetWebGLMessage()
 
-var element, mouse, lastMove, lastTime
+var element
 var projector
+var lastTime
+var mouse, lastMove
+var button = {}
 
-var fluid, velocityField
+var fires, fluid, velocityField
 
 var camera, controls, scene, renderer
 
@@ -27,15 +30,18 @@ var VECTOR_INDEX   = Math.floor(GRID_SIZE[1] / 2)
 var VECTOR_MODULO  = 1
 var VECTOR_OFFSET  = GRID_SIZE[1] / 2 - 0.5
 
-var BURN_RATE      = 10     // needs a residual
+var BURN_RATE      = 50     // needs a residual
 
-var PARTICLE_COUNT = 10000
+var PARTICLE_COUNT = 20000
 var PARTICLE_SIZE  = 1
 
 init()
 animate()
 
 function init() {
+
+	// Default fire locations
+	fires = [ {x: 0, y: 0, z: 0.5, heat: 1} ]
 
 	// renderer
 	renderer = new THREE.WebGLRenderer({
@@ -164,16 +170,29 @@ function init() {
 
 	// append
 	document.body.appendChild(renderer.domElement)
-	element.addEventListener('mousemove', onMouseMove, false)
+	document.addEventListener('mousemove', onMouseMove, false)
+	document.addEventListener('keypress',  onKeyPress,  false)
 	//window.addEventListener('resize', onWindowResize, false)
 
 }
 
 function onMouseMove(event) {
 	event.preventDefault()
-	var x =  (((event.clientX - element.offsetLeft) / element.offsetWidth ) * 2 - 1)
-	var y = -(((event.clientY - element.offsetTop)  / element.offsetHeight) * 2 - 1)
-	mouse = [x, y]
+	var x =  (((event.clientX - element.offsetLeft + document.body.scrollLeft) / element.offsetWidth ) * 2 - 1)
+	var y = -(((event.clientY - element.offsetTop  + document.body.scrollTop)  / element.offsetHeight) * 2 - 1)
+	//console.log('move-xy='+[x,y])
+	mouse  = {x:x, y:y}
+	button.x = x
+	button.y = y
+}
+
+function onKeyPress(event) {
+	if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+		return
+	if (event.key != 'f')
+		return
+	event.preventDefault()
+	button.key = event.key
 }
 
 function onWindowResize() {
@@ -210,13 +229,6 @@ function animateSmoke(dt) {
 	var points  = smokeParticles.vertices
 	var sorted  = points.sort(function(a, b){a.z - b.z})
 
-	// Default fire locations
-	var fires = [
-		{x: 0, y: 0, z: 0.5, heat: 1},
-		{x: 2, y: 0, z: 0.5, heat: 1},
-		{x: 0, y:-2, z: 0.5, heat: 1},
-	]
-
 	// Split pionts into visible and hidden points
 	var visible = [], hidden = []
 	for (var i = 0; i < points.length; i++) {
@@ -234,7 +246,7 @@ function animateSmoke(dt) {
 				var point = hidden.pop()
 				point.x = fire.x + (Math.random()-0.5) * 0.5
 				point.y = fire.y + (Math.random()-0.5) * 0.5
-				point.z = fire.z + (Math.random())     * 2
+				point.z = fire.z + (Math.random())     * 0.5
 				visible.push(point)
 			}
 		}
@@ -248,7 +260,7 @@ function animateSmoke(dt) {
 		//var normal    = new THREE.Vector3(0,-1,0)
 		var normal    = camera.position.clone().normalize()
 		var plane     = new THREE.Plane(normal, 0)
-		var vector    = new THREE.Vector3(mouse[0], mouse[1], 1)
+		var vector    = new THREE.Vector3(mouse.x, mouse.y, 1)
 		var raycaster = projector.pickingRay(vector, camera)
 		var position  = raycaster.ray.intersectPlane(plane)
 
@@ -261,6 +273,22 @@ function animateSmoke(dt) {
 
 		lastMove = position
 		mouse    = false
+	}
+	if (button && button.key == 'f') {
+		var normal    = new THREE.Vector3(0, 0, 1)
+		var plane     = new THREE.Plane(normal, 0)
+		var vector    = new THREE.Vector3(button.x, button.y, 1)
+		var raycaster = projector.pickingRay(vector, camera)
+		var position  = raycaster.ray.intersectPlane(plane)
+		//alert('xy='+[button.x, button.y])
+		//alert('pos: ' + [position.x, position.y, position.z])
+		fires.push({
+			x: position.x,
+			y: position.y,
+			z: 0.5,
+			heat: 1
+		})
+		button.key = false
 	}
 
 	// Move the visible points
