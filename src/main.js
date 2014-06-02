@@ -32,7 +32,7 @@ var VECTOR_OFFSET  = GRID_SIZE[1] / 2 - 0.5
 
 var BURN_RATE      = 50     // needs a residual
 
-var PARTICLE_COUNT = 20000
+var PARTICLE_COUNT = 10000
 var PARTICLE_SIZE  = 1
 
 init()
@@ -189,8 +189,6 @@ function onMouseMove(event) {
 function onKeyPress(event) {
 	if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
 		return
-	if (event.key != 'f')
-		return
 	event.preventDefault()
 	button.key = event.key
 }
@@ -274,22 +272,44 @@ function animateSmoke(dt) {
 		lastMove = position
 		mouse    = false
 	}
-	if (button && button.key == 'f') {
-		var normal    = new THREE.Vector3(0, 0, 1)
-		var plane     = new THREE.Plane(normal, 0)
-		var vector    = new THREE.Vector3(button.x, button.y, 1)
-		var raycaster = projector.pickingRay(vector, camera)
-		var position  = raycaster.ray.intersectPlane(plane)
-		//alert('xy='+[button.x, button.y])
-		//alert('pos: ' + [position.x, position.y, position.z])
-		if (Math.abs(position.x) < GROUND_SIZE/2 &&
-		    Math.abs(position.y) < GROUND_SIZE/2)
-			fires.push({
-				x: position.x,
-				y: position.y,
-				z: 0.5,
-				heat: 1
-			})
+	if (button && button.key) {
+		switch (button.key) {
+			case 'e': // extinguish
+				this.fires = []
+				break;
+
+			case 'c': // clear
+				var points = smokeParticles.vertices
+				for (var i = 0; i < points.length; i++)
+					points[i].z = -1
+				break;
+
+			case 's': // stop
+				var vel = fluid.getVelocity()
+				for (var x = 0; x < GRID_SIZE[0]; x++)
+				for (var y = 0; y < GRID_SIZE[1]; y++)
+				for (var z = 0; z < GRID_SIZE[2]; z++)
+					vel[x][y][z] = [0,0,0]
+				break;
+
+			case 'f': // fire
+				var normal    = new THREE.Vector3(0, 0, 1)
+				var plane     = new THREE.Plane(normal, 0)
+				var vector    = new THREE.Vector3(button.x, button.y, 1)
+				var raycaster = projector.pickingRay(vector, camera)
+				var position  = raycaster.ray.intersectPlane(plane)
+				//alert('xy='+[button.x, button.y])
+				//alert('pos: ' + [position.x, position.y, position.z])
+				if (Math.abs(position.x) < GROUND_SIZE/2 &&
+				    Math.abs(position.y) < GROUND_SIZE/2)
+					fires.push({
+						x: position.x,
+						y: position.y,
+						z: 0.5,
+						heat: 1
+					})
+				break;
+		}
 		button.key = false
 	}
 
@@ -322,9 +342,12 @@ function animateSmoke(dt) {
 	}
 
 	// Remove old objects
-	for (var i = 0; i < visible.length; i++)
-		if (visible[i].z >= GROUND_SIZE)
+	for (var i = 0; i < visible.length; i++) {
+		if (Math.abs(visible[i].x) >= GROUND_SIZE/2 ||
+		    Math.abs(visible[i].y) >= GROUND_SIZE/2 ||
+		    visible[i].z >= GROUND_SIZE)
 			visible[i].z = -1
+	}
 }
 
 function render() {
