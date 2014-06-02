@@ -22,6 +22,8 @@ var GRID_OFFSET    = [-(GRID_SIZE[0]/2-0.5) * GRID_SCALE[0],
 
 var VECTOR_OFFSET  = GRID_SIZE[1] / 2 - 0.5
 
+var BURN_RATE      = 10     // needs a residual
+
 var PARTICLE_COUNT = 10000
 var PARTICLE_SIZE  = 1
 
@@ -54,6 +56,7 @@ function init() {
 	var aspect  = element.width / element.height
 	camera = new THREE.PerspectiveCamera(30, aspect, 0.01, 1000)
 	camera.position.set(-15, -50, 25)
+	//camera.position.set(0, -50, 2)
 	camera.up.set(0, 0, 1)
 	controls = new THREE.OrbitControls(camera)
 	controls.target = new THREE.Vector3(0, 0, 7)
@@ -198,9 +201,9 @@ function animateSmoke(dt) {
 
 	// Default fire locations
 	var fires = [
-		{x: 0, y: 0, z: 0},
-		{x: 5, y: 0, z: 0},
-		{x: 0, y:-5, z: 0},
+		{x: 0, y: 0, z: 0.5, heat: 1},
+		{x: 5, y: 0, z: 0.5, heat: 1},
+		{x: 0, y:-5, z: 0.5, heat: 1},
 	]
 
 	// Split pionts into visible and hidden points
@@ -214,16 +217,18 @@ function animateSmoke(dt) {
 
 	// Add new points
 	for (var f = 0; f < fires.length; f++) {
-		for (var i = 0; i < 100 * dt; i++) {
+		var fire = fires[f]
+		for (var i = 0; i < BURN_RATE * dt; i++) {
 			if (hidden.length > 0) {
 				var point = hidden.pop()
-				point.x = fires[f].x + (Math.random()-0.5) * 0.5
-				point.y = fires[f].y + (Math.random()-0.5) * 0.5
-				point.z = fires[f].z + (Math.random())     * 2
+				point.x = fire.x + (Math.random()-0.5) * 0.5
+				point.y = fire.y + (Math.random()-0.5) * 0.5
+				point.z = fire.z + (Math.random())     * 2
 				visible.push(point)
 			}
 		}
-
+		fluid.addForce(fire.x, fire.y, fire.z,
+				[0, 0, fire.heat * dt])
 	}
 
 	// Process mouse events

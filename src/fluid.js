@@ -30,10 +30,13 @@ CS274C.Fluid = function(size, scale, offset) {
 	var xs = this.vel.length
 	var ys = this.vel[0].length
 
-	this.vel[Math.floor(xs/2)-1][1][1] = 5
-	this.vel[Math.floor(xs/2)-0][1][1] = 5
-	this.vel[Math.floor(xs/2)-1][2][1] = 5
-	this.vel[Math.floor(xs/2)-0][2][1] = 5
+	// Testing
+	//this.vel[Math.floor(xs/2)-1][1][1] = 5
+	//this.vel[Math.floor(xs/2)  ][1][1] = 5
+	//this.vel[Math.floor(xs/2)+1][1][1] = 5
+	//this.vel[Math.floor(xs/2)-1][2][1] = 5
+	//this.vel[Math.floor(xs/2)  ][2][1] = 5
+	//this.vel[Math.floor(xs/2)+1][2][1] = 5
 
 	// Set parameters
 	this.size   = size
@@ -61,8 +64,9 @@ CS274C.Fluid.prototype.step = function(dt) {
 	var prev_vel = make_grid(xs, ys, function(){ return [0.0,0.0] })
 
 	// Testing
-	this.vel[Math.floor(xs/2)-1][1][1] = 1
-	this.vel[Math.floor(xs/2)-0][1][1] = 1
+	//this.vel[Math.floor(xs/2)-1][1][1] = 1
+	//this.vel[Math.floor(xs/2)  ][1][1] = 1
+	//this.vel[Math.floor(xs/2)+1][1][1] = 1
 
 	//this.vel[0][0][1] += dt
 	//this.vel[1][1][1] += dt
