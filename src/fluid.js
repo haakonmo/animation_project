@@ -77,6 +77,10 @@ CS274C.Fluid.prototype.move = function(dt, points) {
 		var y1  = y0 + 1
 		var z1  = z0 + 1
 
+		if (x0 < 1 || x1 >= this.xs-1) return
+		if (y0 < 1 || y1 >= this.ys-1) return
+		if (z0 < 1 || z1 >= this.zs-1) return
+
 		var xsf = x1 - xc
 		var ysf = y1 - yc
 		var zsf = z1 - zc
@@ -128,6 +132,10 @@ CS274C.Fluid.prototype.addForce = function(x, y, z, vel) {
 	var x1  = x0 + 1
 	var y1  = y0 + 1
 	var z1  = z0 + 1
+
+	if (x0 < 1 || x1 >= this.xs-1) return
+	if (y0 < 1 || y1 >= this.ys-1) return
+	if (z0 < 1 || z1 >= this.zs-1) return
 
 	var xsf = x1 - xc
 	var ysf = y1 - yc

@@ -282,12 +282,14 @@ function animateSmoke(dt) {
 		var position  = raycaster.ray.intersectPlane(plane)
 		//alert('xy='+[button.x, button.y])
 		//alert('pos: ' + [position.x, position.y, position.z])
-		fires.push({
-			x: position.x,
-			y: position.y,
-			z: 0.5,
-			heat: 1
-		})
+		if (Math.abs(position.x) < GROUND_SIZE/2 &&
+		    Math.abs(position.y) < GROUND_SIZE/2)
+			fires.push({
+				x: position.x,
+				y: position.y,
+				z: 0.5,
+				heat: 1
+			})
 		button.key = false
 	}
 
