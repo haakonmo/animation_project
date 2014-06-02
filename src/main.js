@@ -79,7 +79,7 @@ function init() {
 	// smoke
 	smokeParticles = new THREE.Geometry
 	for (var i = 0; i < PARTICLE_COUNT; i++) {
-		var particle = new THREE.Vector3(0, 0, 0)
+		var particle = new THREE.Vector3(0, 0, -1)
 		smokeParticles.vertices.push(particle)
 	}
 
@@ -125,18 +125,47 @@ function animate() {
 }
 
 function animateSmoke() {
-	var points = smokeParticles.vertices
+	var points  = smokeParticles.vertices
+	var sorted  = points.sort(function(a, b){a.z - b.z})
 
-	fluid.step()
-	fluid.move(points)
+	// Default fire locations
+	var fires = [
+		{x: 0, y: 0, z: 0},
+		{x: 5, y: 0, z: 0},
+		{x: 0, y:-5, z: 0},
+	]
 
+	// Split pionts into visible and hidden points
+	var visible = [], hidden = [];
 	for (var i = 0; i < points.length; i++) {
-		if (points[i].y >= window.innerHeight) {
-			//points[i].x = 0
-			points[i].y = 0
-			points[i].z = 0
-		}
+		if (points[i].z >= -0.5)
+			visible.push(points[i])
+		else
+			hidden.push(points[i])
 	}
+
+	// Add new points
+	for (var f = 0; f < fires.length; f++) {
+		for (var i = 0; i < 10; i++) {
+			if (hidden.length > 0) {
+				var point = hidden.pop()
+				point.x = fires[f].x
+				point.y = fires[f].y
+				point.z = fires[f].z
+				visible.push(point)
+			}
+		}
+
+	}
+
+	// Move the visible points
+	fluid.step()
+	fluid.move(visible)
+
+	// Remove old objects
+	for (var i = 0; i < visible.length; i++)
+		if (visible[i].z >= 10)
+			visible[i].z = -1
 }
 
 function render() {

@@ -82,7 +82,7 @@ CS274C.Fluid.prototype.move = function(points) {
 		//alert('x='+points[i].x+' y='+points[i].y)
 
 		var ix  = Math.floor((points[i].x/32) + (xs/2))
-		var iy  = Math.floor((points[i].y/32) + (ys/2))
+		var iy  = Math.floor((points[i].z/32) + (ys/2))
 
 		//alert('ix='+ix+' iy='+iy)
 
