@@ -10,9 +10,12 @@ var camera, controls, scene, renderer
 
 var smokeParticles, smoke
 
-var GROUND_SIZE    = 16
+var GROUND_SIZE    = 25
 
+//var GRID_SIZE      = [7, 7, 7]
+//var GRID_SIZE      = [11, 11, 11]
 var GRID_SIZE      = [19, 19, 19]
+//var GRID_SIZE      = [35, 35, 35]
 var GRID_SCALE     = [GROUND_SIZE / (GRID_SIZE[0]-3),
                       GROUND_SIZE / (GRID_SIZE[1]-3),
                       GROUND_SIZE / (GRID_SIZE[2]-3)]
@@ -20,6 +23,8 @@ var GRID_OFFSET    = [-(GRID_SIZE[0]/2-0.5) * GRID_SCALE[0],
                       -(GRID_SIZE[1]/2-0.5) * GRID_SCALE[1],
                       -(               1.0) * GRID_SCALE[2]]
 
+var VECTOR_INDEX   = Math.floor(GRID_SIZE[1] / 2)
+var VECTOR_MODULO  = 1
 var VECTOR_OFFSET  = GRID_SIZE[1] / 2 - 0.5
 
 var BURN_RATE      = 10     // needs a residual
@@ -100,7 +105,7 @@ function init() {
 	var sphere         = new THREE.Mesh(sphereGeometry, sphereMaterial)
 	sphere.position.set(-5, 5, 2)
 	sphere.castShadow = true
-	scene.add(sphere)
+	//scene.add(sphere)
 
 	// smoke
 	smokeParticles = new THREE.Geometry
@@ -112,9 +117,10 @@ function init() {
 	var smokeMaterial = new THREE.ParticleBasicMaterial({
 		// map: THREE.ImageUtils.loadTexture('../images/particle.png'),
 		transparent: true,
-		blending:    THREE.AdditiveBlending,
+		blending:    THREE.NormalBlending,
 		size:        PARTICLE_SIZE,
-		color:       0x111111
+		color:       0xE0E0E0,
+		opacity:     0.1
 	})
 
 	smoke = new THREE.ParticleSystem(smokeParticles, smokeMaterial)
@@ -126,8 +132,13 @@ function init() {
 	// velocity field
 	velocityField = []
 	for (var x = 0; x < GRID_SIZE[0]; x++)
+	for (var y = 0; y < GRID_SIZE[1]; y++)
 	for (var z = 0; z < GRID_SIZE[2]; z++) {
-		var y   = VECTOR_OFFSET
+		if ((y != VECTOR_INDEX) ||
+		    (x % VECTOR_MODULO) ||
+		    (y % VECTOR_MODULO) ||
+		    (z % VECTOR_MODULO))
+			continue
 		var src = new THREE.Vector3(
 				x * GRID_SCALE[0] + GRID_OFFSET[0],
 				y * GRID_SCALE[1] + GRID_OFFSET[1],
@@ -202,8 +213,8 @@ function animateSmoke(dt) {
 	// Default fire locations
 	var fires = [
 		{x: 0, y: 0, z: 0.5, heat: 1},
-		{x: 5, y: 0, z: 0.5, heat: 1},
-		{x: 0, y:-5, z: 0.5, heat: 1},
+		{x: 2, y: 0, z: 0.5, heat: 1},
+		{x: 0, y:-2, z: 0.5, heat: 1},
 	]
 
 	// Split pionts into visible and hidden points
@@ -233,8 +244,11 @@ function animateSmoke(dt) {
 
 	// Process mouse events
 	if (mouse) {
+		//var normal    = new THREE.Vector3(0,-1,0)
+		//var normal    = new THREE.Vector3(0,-1,0)
+		var normal    = camera.position.clone().normalize()
+		var plane     = new THREE.Plane(normal, 0)
 		var vector    = new THREE.Vector3(mouse[0], mouse[1], 1)
-		var plane     = new THREE.Plane(new THREE.Vector3(0,-1,0), 0)
 		var raycaster = projector.pickingRay(vector, camera)
 		var position  = raycaster.ray.intersectPlane(plane)
 
@@ -257,12 +271,18 @@ function animateSmoke(dt) {
 	var vel = fluid.getVelocity()
 	var idx = 0
 	for (var x = 0; x < GRID_SIZE[0]; x++)
+	for (var y = 0; y < GRID_SIZE[1]; y++)
 	for (var z = 0; z < GRID_SIZE[2]; z++) {
+		if ((y != VECTOR_INDEX) ||
+		    (x % VECTOR_MODULO) ||
+		    (y % VECTOR_MODULO) ||
+		    (z % VECTOR_MODULO))
+			continue
 		var arr = velocityField[idx++]
-		var vec = vel[x][z]
+		var vec = vel[x][y][z]
 		arr.dst.set(arr.src.x + vec[0],
-		            arr.src.y + 0,
-		            arr.src.z + vec[1])
+		            arr.src.y + vec[1],
+		            arr.src.z + vec[2])
 		var mag = arr.src.clone().sub(arr.dst).length()
 		if (mag < 0.1)
 			arr.dst.set(arr.src.x + 0,
