@@ -17,7 +17,7 @@ var GROUND_SIZE     = 25
 
 //var GRID_SIZE        = [7, 7, 7]
 //var GRID_SIZE        = [11, 11, 11]
-//var GRID_SIZE        = [19, 19, 19]
+var GRID_SIZE        = [19, 19, 19]
 //var GRID_SIZE        = [35, 35, 35]
 
 var GRID_SCALE       = [GROUND_SIZE / (GRID_SIZE[0]-3),
@@ -31,10 +31,10 @@ var VECTOR_INDEX     = Math.floor(GRID_SIZE[1] / 2)
 var VECTOR_MODULO    = 1
 var VECTOR_OFFSET    = GRID_SIZE[1] / 2 - 0.5
                      
-var BURN_RATE        = 200    // needs a residual
+var BURN_RATE        = 300    // needs a residual
 
 var PARTICLE_COUNT   = 10000
-var PARTICLE_SIZE    = 10
+var PARTICLE_SIZE    = 5
 var PARTICLE_OPACITY = 0.02
 
 init()
@@ -43,7 +43,7 @@ animate()
 function init() {
 
 	// Default fire locations
-	fires = [ {x: 0, y: 0, z: 0.5, heat: 1} ]
+	fires = [ {x: 0, y: 0, z: 0.5, heat: 5} ]
 
 	// renderer
 	renderer = new THREE.WebGLRenderer({
@@ -209,7 +209,8 @@ function onKeyPress(event) {
 	if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
 		return
 	event.preventDefault()
-	button.key = event.key
+	button.key = String.fromCharCode(event.keyCode)
+//	button.key = event.key
 }
 
 function onWindowResize() {
@@ -333,8 +334,8 @@ function animateSmoke(dt) {
 	}
 
 	// Move the visible points
-	fluid.step(dt)
-	fluid.move(dt, visible)
+	fluid.step(dt*2)
+	fluid.move(dt*2, visible)
 
 	// Update velocity field
 	var vel = fluid.getVelocity()
