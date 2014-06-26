@@ -9,7 +9,7 @@ var button = {}
 
 var fires, fluid, velocityField
 
-var camera, controls, scene, renderer
+var camera, controls, scene, renderer, sky
 
 var smokeParticles
 
@@ -54,7 +54,7 @@ function init() {
 	renderer.shadowMapCullFace = THREE.CullFaceBack
 
 	//renderer.setClearColor(0x8088e0, 1)
-	renderer.setClearColor(0x00ff00, 1)
+	renderer.setClearColor(0x000000, 1)
 
 	element = renderer.domElement
 
@@ -105,7 +105,7 @@ function init() {
 		map: THREE.ImageUtils.loadTexture('../images/sky.png'),
 	})
 
-	var sky = new THREE.Mesh(skyGeometry, skyMaterial)
+	sky = new THREE.Mesh(skyGeometry, skyMaterial)
 	sky.rotation.x = Math.PI/2
 	sky.rotation.y = 0
 	sky.rotation.z = -Math.PI/2
@@ -312,6 +312,8 @@ function animateSmoke(dt) {
 					vel[x][y][z] = [0,0,0]
 				break
 
+			case 'b': // background
+				sky.visible = !sky.visible
 			case 'f': // fire
 				var normal    = new THREE.Vector3(0, 0, 1)
 				var plane     = new THREE.Plane(normal, 0)

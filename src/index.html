@@ -1,9 +1,9 @@
 <html>
-	<head>
-		<title>CS270C - Project Name</title>
-		<link rel="stylesheet" type="text/css" href="./style.css" />
-		<meta charset="UTF-8" />
-		<script type="x-shader/x-vertex" id="vertexshader">
+<head>
+<title>CS274C - Project Name</title>
+<link rel="stylesheet" type="text/css" href="./style.css" />
+<meta charset="UTF-8" />
+<script type="x-shader/x-vertex" id="vertexshader">
 			attribute float alpha;
 			varying float vAlpha;
 			void main() {
@@ -13,20 +13,47 @@
 				gl_Position = projectionMatrix * mvPosition;
 			}
 		</script>
-		<script type="x-shader/x-fragment" id="fragmentshader">
+
+<script type="x-shader/x-fragment" id="fragmentshader">
 			uniform vec3 color;
 			varying float vAlpha;
 			void main() {
 				gl_FragColor = vec4( color, vAlpha );
 			}
 		</script>
-	</head>
-	<body>
-		<script src="../lib/three.min.js"></script>
-		<script src="../lib/OrbitControlsEnu.js"></script>
-		<script src="../lib/Detector.js"></script>
-		<script src="./cs274c.js"></script>
-		<script src="./fluid.js"></script>
-		<script src="./main.js"></script>
-	</body>
+
+<script type="text/javascript">
+	function closeWindow() {
+		document.getElementById("menu").style.display="none";
+	}
+</script>
+
+</head>
+<body>
+	<div id="menu">
+		<h1>Smoke Animation Using Fluid Dynamics</h1>
+		<h2>by Andre Philipp, Andy Spencer & Haakon Garseg Moerk</h2>
+
+		<p>Move mouse over vectors to change them</p>
+		<p>Left click and drag to rotate camera</p>
+		<p>Right click and drag to move camera</p>
+		<p>f - add smoke source at mouse position</p>
+		<p>c - clear smoke</p>
+		<p>s - clear vector field</p>
+		<p>b - toggle background image visibility on/off</p>
+		<br/>
+		<p>
+			<a class="button" href="report.pdf">Report</a> 
+			<a class="button"href="main.js">Source Code</a> 
+		</p>
+		<a href="#" onclick="closeWindow()">Close</a>
+	</div>
+	<script src="../lib/three.min.js"></script>
+	<script src="../lib/OrbitControlsEnu.js"></script>
+	<script src="../lib/Detector.js"></script>
+	<script src="./cs274c.js"></script>
+	<script src="./fluid.js"></script>
+	<script src="./main.js"></script>
+
+</body>
 </html>
