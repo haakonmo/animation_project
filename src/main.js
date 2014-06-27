@@ -53,7 +53,6 @@ function init() {
 	renderer.shadowMapEnabled  = true
 	renderer.shadowMapCullFace = THREE.CullFaceBack
 
-	//renderer.setClearColor(0x8088e0, 1)
 	renderer.setClearColor(0x000000, 1)
 
 	element = renderer.domElement
@@ -69,7 +68,6 @@ function init() {
 	var aspect  = element.width / element.height
 	camera = new THREE.PerspectiveCamera(30, aspect, 0.01, 1000)
 	camera.position.set(-15, -50, 20)
-	//camera.position.set(0, -50, 2)
 	camera.up.set(0, 0, 1)
 	controls = new THREE.OrbitControls(camera)
 	controls.target = new THREE.Vector3(0, 0, 7)
