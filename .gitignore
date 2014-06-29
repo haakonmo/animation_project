@@ -2,5 +2,9 @@
 *~
 *.swp
 
+# Latex stuff
+doc/*.aux
+doc/*.log
+
 # Andy's stuff
 makefile

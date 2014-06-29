@@ -100,7 +100,7 @@ function init() {
 	// sky
 	var skyGeometry = new THREE.SphereGeometry(50, 50, 40)
 	var skyMaterial = new THREE.MeshBasicMaterial({
-		map: THREE.ImageUtils.loadTexture('../images/sky.png'),
+		map: THREE.ImageUtils.loadTexture('../images/sky_s.jpg'),
 	})
 
 	sky = new THREE.Mesh(skyGeometry, skyMaterial)
@@ -115,7 +115,7 @@ function init() {
 	// ground
 	var groundGeometry = new THREE.PlaneGeometry(GROUND_SIZE*2, GROUND_SIZE*2)
 	var groundMaterial = new THREE.MeshBasicMaterial({
-		map : THREE.ImageUtils.loadTexture('../images/ground.jpg'),
+		map : THREE.ImageUtils.loadTexture('../images/ground_s.jpg'),
 	})
 	var ground         = new THREE.Mesh(groundGeometry, groundMaterial)
 	ground.receiveShadow = true
@@ -207,8 +207,10 @@ function onKeyPress(event) {
 	if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
 		return
 	event.preventDefault()
-	button.key = String.fromCharCode(event.keyCode)
-//	button.key = event.key
+	if (event.key)
+		button.key = event.key
+	else
+		button.key = String.fromCharCode(event.keyCode)
 }
 
 function onWindowResize() {

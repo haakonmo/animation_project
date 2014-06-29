@@ -1,22 +1,56 @@
+<!DOCTYPE html>
 <html>
-<head>
-<title>CS274C - Project Name</title>
-<link rel="stylesheet" type="text/css" href="./style.css" />
-<meta charset="UTF-8" />
-</head>
-<body>
-	<div id="menu">
-		<h1>Demo Videos</h1>
-		<p>
-			<video width="320" height="240" controls>
-				<source src="../images/smoke1.mp4" type="video/mp4">
-				Your browser does not support the video tag.
-			</video>
-			<video width="320" height="240" controls>
-				<source src="../images/smoke2.mp4" type="video/mp4">
-				Your browser does not support the video tag.
-			</video>
-		</p>
-	</div>
-</body>
+	<head>
+		<link rel="stylesheet" href="//releases.flowplayer.org/5.4.6/skin/minimalist.css">
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		<script src="//releases.flowplayer.org/5.4.6/flowplayer.min.js"></script>
+
+		<title>CS274C - Animating Smoke</title>
+		<link rel="stylesheet" type="text/css" href="./style.css" />
+		<meta charset="UTF-8" />
+
+		<script>
+			flowplayer.conf.ratio = 240/320;
+		</script>
+		<style>
+			.flowplayer {
+				display: inline-block;
+				width:   320px;
+				height:  240px;
+				margin:  0 0 4em 0;
+			}
+			.caption {
+				display:     block;
+				margin-top:  240px;
+				padding-top: 1.5em;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="videos">
+			<h1 style="clear: both;">Demo Videos</h1>
+			<div>
+				<span class="flowplayer fixed-controls play-button no-volume no-mute">
+					<video width="320" height="240" controls>
+						<source src="../images/smoke1.mp4" type="video/mp4">
+						<source src="../images/smoke1.flv" type="video/flash">
+						Your browser does not support the video tag.
+					</video>
+					<div class="caption">
+						<a href="../images/smoke1.mp4">Download Video 1</a>
+					</div>
+				</span>
+				<span class="flowplayer fixed-controls play-button no-volume no-mute">
+					<video width="320" height="240" controls>
+						<source src="../images/smoke2.mp4" type="video/mp4">
+						<source src="../images/smoke2.flv" type="video/flash">
+						Your browser does not support the video tag.
+					</video>
+					<div class="caption">
+						<a href="../images/smoke2.mp4">Download Video 2</a>
+					</div>
+				</span>
+			</div>
+		</div>
+	</body>
 </html>

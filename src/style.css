@@ -13,6 +13,20 @@ canvas {
 	height: 100%
 }
 
+#videos {
+	text-align: center;
+	padding: 10px;
+	height: 500px;
+	position: absolute;
+	top: 50%;
+	left: 0;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: -250px;
+	left: 0;
+}
+
 #menu {
 	text-align: center;
 	background-color: rgba(255, 255, 255, 0.7);
